@@ -512,7 +512,11 @@ ApkSignatureResult VerifyApkV2Signature(const std::filesystem::path& apk_path) {
     try {
         const auto layout = ReadLayout(apk_path);
         const auto content_digest = ComputeContentDigest(apk_path, layout);
-        ByteReader signers(layout.v2_block);
+        ByteReader v2_block(layout.v2_block);
+        auto signers = v2_block.ReadLengthPrefixed();
+        if (!v2_block.empty()) {
+            throw std::runtime_error("Unexpected trailing bytes in APK v2 block");
+        }
         std::set<std::wstring> signer_set;
         while (!signers.empty()) {
             const auto signer = ParseSigner(signers.ReadLengthPrefixed());
