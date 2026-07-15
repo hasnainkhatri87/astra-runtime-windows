@@ -1,5 +1,6 @@
 #include "astra/package_store.hpp"
 #include "astra/google_services.hpp"
+#include "astra/dex_executor.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -12,7 +13,19 @@ void PrintUsage() {
         << L"Astra package utility\n\n"
         << L"  astra-cli install <package.apk|apkm|apks|xapk>\n"
         << L"  astra-cli list\n"
-        << L"  astra-cli services\n";
+        << L"  astra-cli services\n"
+        << L"  astra-cli dex-execute <file.dex> <class-descriptor> <method>\n";
+}
+
+bool NarrowAscii(const wchar_t* value, std::string& output) {
+    output.clear();
+    for (; *value != 0; ++value) {
+        if (*value < 0 || *value > 0x7f) {
+            return false;
+        }
+        output.push_back(static_cast<char>(*value));
+    }
+    return true;
 }
 
 }  // namespace
@@ -64,6 +77,25 @@ int wmain(int argument_count, wchar_t** arguments) {
     if (command == L"services") {
         std::wcout << astra::GoogleServicesPolicySummary();
         return 0;
+    }
+
+    if (command == L"dex-execute") {
+        if (argument_count != 5) {
+            PrintUsage();
+            return 1;
+        }
+        std::string class_descriptor;
+        std::string method_name;
+        if (!NarrowAscii(arguments[3], class_descriptor) ||
+            !NarrowAscii(arguments[4], method_name)) {
+            std::wcerr <<
+                L"DEX class descriptors and method names must be ASCII.\n";
+            return 1;
+        }
+        const auto result = astra::ExecuteStaticIntMethod(
+            arguments[2], class_descriptor, method_name);
+        std::wcout << result.message << L'\n';
+        return result.ok ? 0 : 3;
     }
 
     PrintUsage();

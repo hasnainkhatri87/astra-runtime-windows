@@ -22,6 +22,7 @@ add_library(astra_core STATIC
     src/android_manifest.cpp
     src/apk_signature.cpp
     src/dex_catalog.cpp
+    src/dex_executor.cpp
     src/google_services.cpp
     src/package_bundle.cpp
     src/sha256.cpp
@@ -83,4 +84,9 @@ if(ASTRA_BUILD_TESTS)
     target_compile_options(astra-google-services-tests PRIVATE /W4 /permissive- /utf-8)
     target_link_libraries(astra-google-services-tests PRIVATE astra_core)
     add_test(NAME astra-google-services COMMAND astra-google-services-tests)
+
+    add_executable(astra-dex-executor-tests tests/dex_executor_tests.cpp)
+    target_compile_options(astra-dex-executor-tests PRIVATE /W4 /permissive- /utf-8)
+    target_link_libraries(astra-dex-executor-tests PRIVATE astra_core)
+    add_test(NAME astra-dex-executor COMMAND astra-dex-executor-tests)
 endif()

@@ -24,6 +24,9 @@ struct DexCatalogResult {
     std::vector<DexInfo> dex_files;
 };
 
+DexInfo ValidateDexFile(const std::filesystem::path& path,
+                        const std::wstring& source_entry);
+
 DexCatalogResult CatalogDexPayloads(
     const std::vector<std::filesystem::path>& verified_apks,
     const std::filesystem::path& app_root);
