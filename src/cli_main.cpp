@@ -20,7 +20,7 @@ void PrintUsage() {
 bool NarrowAscii(const wchar_t* value, std::string& output) {
     output.clear();
     for (; *value != 0; ++value) {
-        if (*value < 0 || *value > 0x7f) {
+        if (static_cast<unsigned int>(*value) > 0x7fU) {
             return false;
         }
         output.push_back(static_cast<char>(*value));

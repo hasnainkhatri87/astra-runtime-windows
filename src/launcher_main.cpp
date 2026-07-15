@@ -37,6 +37,10 @@ void ApplyDefaultFont(HWND control) {
                  reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 }
 
+HMENU ControlId(int value) noexcept {
+    return reinterpret_cast<HMENU>(static_cast<INT_PTR>(value));
+}
+
 std::wstring QuoteArgument(const std::wstring& value) {
     std::wstring result = L"\"";
     std::size_t backslashes = 0;
@@ -211,19 +215,19 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message,
                               reinterpret_cast<LONG_PTR>(state));
             state->install = CreateWindowW(L"BUTTON", L"Install package",
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0,
-                window, reinterpret_cast<HMENU>(kInstallButton), nullptr, nullptr);
+                window, ControlId(kInstallButton), nullptr, nullptr);
             state->run = CreateWindowW(L"BUTTON", L"Run",
                 WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 0, 0, 0, 0,
-                window, reinterpret_cast<HMENU>(kRunButton), nullptr, nullptr);
+                window, ControlId(kRunButton), nullptr, nullptr);
             state->refresh = CreateWindowW(L"BUTTON", L"Refresh",
                 WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0,
-                window, reinterpret_cast<HMENU>(kRefreshButton), nullptr, nullptr);
+                window, ControlId(kRefreshButton), nullptr, nullptr);
             state->list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"",
                 WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY,
-                0, 0, 0, 0, window, reinterpret_cast<HMENU>(kAppList), nullptr, nullptr);
+                0, 0, 0, 0, window, ControlId(kAppList), nullptr, nullptr);
             state->status = CreateWindowW(L"STATIC", L"",
                 WS_CHILD | WS_VISIBLE | SS_LEFT, 0, 0, 0, 0,
-                window, reinterpret_cast<HMENU>(kStatusText), nullptr, nullptr);
+                window, ControlId(kStatusText), nullptr, nullptr);
             ApplyDefaultFont(state->install);
             ApplyDefaultFont(state->run);
             ApplyDefaultFont(state->refresh);

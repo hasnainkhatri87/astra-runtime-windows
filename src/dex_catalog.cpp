@@ -43,6 +43,18 @@ std::wstring Lower(std::wstring value) {
     return value;
 }
 
+std::string NarrowAscii(const std::wstring& value) {
+    std::string result;
+    result.reserve(value.size());
+    for (const wchar_t character : value) {
+        if (static_cast<unsigned int>(character) > 0x7fU) {
+            throw std::runtime_error("DEX catalog name is not ASCII");
+        }
+        result.push_back(static_cast<char>(character));
+    }
+    return result;
+}
+
 bool IsDexEntry(const ZipEntry& entry) {
     if (entry.is_directory || entry.name.find(L'/') != std::wstring::npos) {
         return false;
@@ -361,8 +373,8 @@ DexCatalogResult CatalogDexPayloads(
 
                 const std::string line =
                     std::to_string(apk_index) + "\t" +
-                    std::string(output_name.begin(), output_name.end()) + "\t" +
-                    std::string(info.version.begin(), info.version.end()) + "\t" +
+                    NarrowAscii(output_name) + "\t" +
+                    NarrowAscii(info.version) + "\t" +
                     std::to_string(info.file_size) + "\t" +
                     std::to_string(info.string_ids) + "\t" +
                     std::to_string(info.type_ids) + "\t" +
