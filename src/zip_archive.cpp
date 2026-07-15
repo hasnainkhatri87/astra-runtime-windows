@@ -270,8 +270,8 @@ void ZipArchive::Extract(const ZipEntry& entry,
         throw std::runtime_error("Unable to create extracted APK");
     }
 
-    std::array<unsigned char, 256 * 1024> input_buffer{};
-    std::array<unsigned char, 256 * 1024> output_buffer{};
+    std::vector<unsigned char> input_buffer(256 * 1024);
+    std::vector<unsigned char> output_buffer(256 * 1024);
     std::uint64_t compressed_remaining = entry.compressed_size;
     std::uint64_t produced = 0;
     uLong crc = crc32(0L, Z_NULL, 0);
