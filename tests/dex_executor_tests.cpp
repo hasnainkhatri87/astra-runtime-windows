@@ -68,7 +68,8 @@ void CheckNt(NTSTATUS status, const char* message) {
 }
 
 void RefreshDexHashes(std::vector<unsigned char>& dex) {
-    std::fill(dex.begin() + 8, dex.begin() + 32, 0);
+    std::fill(dex.begin() + 8, dex.begin() + 32,
+              static_cast<unsigned char>(0));
     BCRYPT_ALG_HANDLE algorithm = nullptr;
     CheckNt(BCryptOpenAlgorithmProvider(&algorithm, BCRYPT_SHA1_ALGORITHM,
                                         nullptr, 0),
@@ -118,7 +119,8 @@ std::vector<unsigned char> BuildProbeDex(
         "AstraProbe.java", "I", "LAstraProbe;",
         "Ljava/lang/Object;", "answer"};
 
-    std::vector<unsigned char> dex(kDataOffset, 0);
+    std::vector<unsigned char> dex(
+        kDataOffset, static_cast<unsigned char>(0));
     const unsigned char magic[8] = {'d', 'e', 'x', '\n', '0', '3', '9', 0};
     std::copy(std::begin(magic), std::end(magic), dex.begin());
     Store32(dex, 0x24, 0x70);
@@ -177,7 +179,9 @@ std::vector<unsigned char> BuildProbeDex(
         Store32(dex, kStringIdsOffset + index * 4,
                 static_cast<std::uint32_t>(dex.size()));
         AppendUleb128(dex, static_cast<std::uint32_t>(strings[index].size()));
-        dex.insert(dex.end(), strings[index].begin(), strings[index].end());
+        for (const char character : strings[index]) {
+            dex.push_back(static_cast<unsigned char>(character));
+        }
         dex.push_back(0);
     }
     while ((dex.size() & 3U) != 0) {
