@@ -420,7 +420,10 @@ ParsedSigner ParseSigner(ByteReader signer) {
     auto certificates = signed_data.ReadLengthPrefixed();
     (void)signed_data.ReadLengthPrefixed();
     if (!signed_data.empty()) {
-        throw std::runtime_error("Unexpected trailing bytes in APK signed data");
+        const auto compatibility_padding = signed_data.ReadLengthPrefixed();
+        if (!compatibility_padding.empty() || !signed_data.empty()) {
+            throw std::runtime_error("Unexpected trailing bytes in APK signed data");
+        }
     }
 
     std::set<std::uint32_t> digest_algorithms;
