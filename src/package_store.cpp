@@ -1,6 +1,7 @@
 #include "astra/package_store.hpp"
 
 #include "astra/apk_signature.hpp"
+#include "astra/android_manifest.hpp"
 #include "astra/dex_catalog.hpp"
 
 #include "astra/package_bundle.hpp"
@@ -174,6 +175,16 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
             }
             signer_value += signer;
         }
+        if (provision.base_apk.empty()) {
+            result.message = L"No base APK was selected.";
+            return result;
+        }
+        const auto android_manifest =
+            ReadAndroidManifestFromApk(provision.base_apk, app_root);
+        if (!android_manifest.ok) {
+            result.message = android_manifest.message;
+            return result;
+        }
         const auto dex_catalog =
             CatalogDexPayloads(provision.selected_apks, app_root);
         if (!dex_catalog.ok) {
@@ -183,6 +194,14 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
         const auto metadata = app_root / L"app.ini";
         WriteIni(metadata, L"id", id);
         WriteIni(metadata, L"display_name", display_name);
+        WriteIni(metadata, L"package_name", android_manifest.package_name);
+        WriteIni(metadata, L"version_name", android_manifest.version_name);
+        WriteIni(metadata, L"version_code", std::to_wstring(android_manifest.version_code));
+        WriteIni(metadata, L"min_sdk", std::to_wstring(android_manifest.min_sdk));
+        WriteIni(metadata, L"target_sdk", std::to_wstring(android_manifest.target_sdk));
+        WriteIni(metadata, L"application_class", android_manifest.application_class);
+        WriteIni(metadata, L"launcher_component", android_manifest.launcher_component);
+        WriteIni(metadata, L"launcher_activity", android_manifest.launcher_activity);
         WriteIni(metadata, L"package_path", destination.wstring());
         WriteIni(metadata, L"data_path", data_root.wstring());
         WriteIni(metadata, L"container_sha256", sha256);
@@ -196,8 +215,11 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
         result.ok = true;
         result.message = provision.message +
                          L" All selected APK v2 signatures and signed content digests verified. " +
+                         android_manifest.message + L" " +
                          dex_catalog.message;
-        result.app = {id, display_name, destination, data_root, sha256};
+        result.app = {id, display_name, android_manifest.package_name,
+                      android_manifest.launcher_activity, destination,
+                      data_root, sha256};
         return result;
     } catch (const std::exception&) {
         result.message = L"Installation failed while validating or copying the package.";
@@ -225,6 +247,8 @@ std::vector<InstalledApp> ListInstalledApps() {
             InstalledApp app;
             app.id = ReadIni(metadata, L"id");
             app.display_name = ReadIni(metadata, L"display_name");
+            app.package_name = ReadIni(metadata, L"package_name");
+            app.launcher_activity = ReadIni(metadata, L"launcher_activity");
             app.package_path = ReadIni(metadata, L"package_path");
             app.data_path = ReadIni(metadata, L"data_path");
             app.container_sha256 = ReadIni(metadata, L"container_sha256");

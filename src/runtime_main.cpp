@@ -14,6 +14,7 @@ struct RuntimeState {
     std::filesystem::path package;
     std::filesystem::path data;
     std::wstring name{L"Application"};
+    std::wstring launcher;
 };
 
 RuntimeState ParseArguments() {
@@ -32,6 +33,8 @@ RuntimeState ParseArguments() {
             state.data = value;
         } else if (key == L"--name") {
             state.name = value;
+        } else if (key == L"--launcher") {
+            state.launcher = value;
         }
     }
     LocalFree(arguments);
@@ -63,7 +66,8 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message,
             if (state) {
                 text += L"Installed package: " + state->name + L"\r\n";
                 text += L"Package: " + state->package.wstring() + L"\r\n";
-                text += L"Private data: " + state->data.wstring() + L"\r\n\r\n";
+                text += L"Private data: " + state->data.wstring() + L"\r\n";
+                text += L"Declared launcher: " + state->launcher + L"\r\n\r\n";
             }
             text +=
                 L"The Windows host, install flow, and process boundary are active.\r\n"

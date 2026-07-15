@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(astra_core STATIC
     src/package_store.cpp
+    src/android_manifest.cpp
     src/apk_signature.cpp
     src/dex_catalog.cpp
     src/package_bundle.cpp
@@ -70,4 +71,9 @@ if(ASTRA_BUILD_TESTS)
     target_compile_options(astra-dex-tests PRIVATE /W4 /permissive- /utf-8)
     target_link_libraries(astra-dex-tests PRIVATE astra_core)
     add_test(NAME astra-dex-catalog COMMAND astra-dex-tests)
+
+    add_executable(astra-manifest-tests tests/android_manifest_tests.cpp)
+    target_compile_options(astra-manifest-tests PRIVATE /W4 /permissive- /utf-8)
+    target_link_libraries(astra-manifest-tests PRIVATE astra_core)
+    add_test(NAME astra-android-manifest COMMAND astra-manifest-tests)
 endif()

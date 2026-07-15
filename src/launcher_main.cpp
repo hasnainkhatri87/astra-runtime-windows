@@ -155,7 +155,8 @@ void RunSelected(HWND window, LauncherState& state) {
     std::wstring command = QuoteArgument(runtime.wstring()) +
                            L" --package " + QuoteArgument(app.package_path.wstring()) +
                            L" --data " + QuoteArgument(app.data_path.wstring()) +
-                           L" --name " + QuoteArgument(app.display_name);
+                           L" --name " + QuoteArgument(app.display_name) +
+                           L" --launcher " + QuoteArgument(app.launcher_activity);
     std::vector<wchar_t> mutable_command(command.begin(), command.end());
     mutable_command.push_back(L'\0');
 

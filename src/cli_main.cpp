@@ -33,7 +33,9 @@ int wmain(int argument_count, wchar_t** arguments) {
             return 2;
         }
         std::wcout << L"ID: " << result.app.id << L'\n'
-                   << L"Package: " << result.app.package_path.wstring() << L'\n'
+                   << L"Android package: " << result.app.package_name << L'\n'
+                   << L"Launcher Activity: " << result.app.launcher_activity << L'\n'
+                   << L"Package file: " << result.app.package_path.wstring() << L'\n'
                    << L"Data: " << result.app.data_path.wstring() << L'\n'
                    << L"SHA-256: " << result.app.container_sha256 << L'\n';
         return 0;
@@ -42,7 +44,8 @@ int wmain(int argument_count, wchar_t** arguments) {
     if (command == L"list") {
         const auto apps = astra::ListInstalledApps();
         for (const auto& app : apps) {
-            std::wcout << app.id << L'\t' << app.display_name << L'\t'
+            std::wcout << app.id << L'\t' << app.package_name << L'\t'
+                       << app.launcher_activity << L'\t'
                        << app.package_path.wstring() << L'\n';
         }
         return 0;

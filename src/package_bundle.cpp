@@ -116,6 +116,7 @@ ProvisionResult ProvisionPackageSplits(const std::filesystem::path& source,
                 std::filesystem::copy_file(source, destination,
                                            std::filesystem::copy_options::none);
             }
+            result.base_apk = destination;
             result.selected_apks.push_back(destination);
             result.ok = true;
             result.message = L"Single APK provisioned.";
@@ -173,6 +174,9 @@ ProvisionResult ProvisionPackageSplits(const std::filesystem::path& source,
             const auto destination = split_root / SafeOutputName(index, unique[index]->name);
             if (!std::filesystem::exists(destination)) {
                 archive.Extract(*unique[index], destination);
+            }
+            if (index == 0) {
+                result.base_apk = destination;
             }
             result.selected_apks.push_back(destination);
             const auto line = unique[index]->name + L"\t" + destination.filename().wstring() + L"\r\n";

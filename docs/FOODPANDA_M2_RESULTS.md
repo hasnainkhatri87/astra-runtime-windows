@@ -1,7 +1,7 @@
 # Foodpanda signed-package and DEX intake result
 
-Test date: 2026-07-15  
-Package: `com.global.foodpanda.android` 26.27.0 (`262700094`)  
+Test date: 2026-07-15
+Package: `com.global.foodpanda.android` 26.27.0 (`262700094`)
 Test boundary: local, offline package intake only
 
 ## Proven result

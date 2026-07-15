@@ -9,6 +9,7 @@ namespace astra {
 struct ProvisionResult {
     bool ok{false};
     std::wstring message;
+    std::filesystem::path base_apk;
     std::vector<std::filesystem::path> selected_apks;
 };
 
