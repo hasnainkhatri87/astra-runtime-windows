@@ -54,8 +54,10 @@ They are excluded from source control and cloud build artifacts.
   only where observable Android WebView behavior remains compatible.
 - **Security:** Job Objects, restricted tokens/AppContainer research, per-app
   storage, permission prompts, and no arbitrary host filesystem access.
-- **GMS boundary:** licensed integration only. Google Play and Google Mobile
-  Services are not AOSP and cannot be bundled without authorization.
+- **Google-service providers:** verified DEX requirements are mapped either to
+  an open-services provider target (microG-compatible framework contracts) or
+  to a separately supplied, authorized GMS plug-in. Astra does not bundle
+  proprietary Play Store/GMS code and never forges Play Integrity.
 
 ## Truthful milestone gates
 
@@ -63,14 +65,18 @@ They are excluded from source control and cloud build artifacts.
 |---|---|---|
 | M0 Windows host | Complete | Install/list a package and open a separate native host process |
 | M1A package structure | Complete for tested APKM | Bounded container parser, split selection, CRC extraction |
-| M1B package trust | Partial | V2 signed content/common signer complete; v3 and binary manifest validation pending |
+| M1B package trust | Partial | V2 signed content/common signer and signed binary manifest parsing complete; v3 pending |
 | M1C DEX intake | Complete for Foodpanda | Recognized DEX, bounded tables/map, SHA-1 and Adler-32; 8 real payloads pass |
 | M2 managed execution | Pending | Execute a synthetic unmodified DEX entry under the Windows runtime and prove its result |
 | M3 first frame | Pending | An Android View/Compose test Activity renders through the Windows surface |
 | M4 Foodpanda cold launch | Pending | Unmodified launcher Activity reaches a rendered offline frame |
 | M5 platform services | Pending | Input, storage, network, WebView, location, and notifications |
 | M6 broader apps | Pending | Compatibility database based on legal user-supplied packages |
-| M7 Google services | Licensing gate | Written licensing and compatibility approval |
+| M7 open services | Detection complete; bridge pending | Detect requirements, route provider calls, and pass Maps/location/auth/push probes |
+| M8 licensed GMS | Authorization gate | Written licensing and compatibility approval before any proprietary binary is accepted |
+
+See [GOOGLE_SERVICES.md](GOOGLE_SERVICES.md) for the provider contract and
+Play Integrity boundary.
 
 The next execution proof must run real DEX instructions. A painted imitation of
 an Android screen does not satisfy M2.

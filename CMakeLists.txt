@@ -22,6 +22,7 @@ add_library(astra_core STATIC
     src/android_manifest.cpp
     src/apk_signature.cpp
     src/dex_catalog.cpp
+    src/google_services.cpp
     src/package_bundle.cpp
     src/sha256.cpp
     src/zip_archive.cpp
@@ -54,6 +55,7 @@ install(TARGETS astra astra-cli astra-runtime
     RUNTIME DESTINATION .
 )
 install(FILES README.md THIRD_PARTY_NOTICES.md DESTINATION .)
+install(FILES docs/ARCHITECTURE.md docs/GOOGLE_SERVICES.md DESTINATION docs)
 
 if(ASTRA_BUILD_TESTS)
     enable_testing()
@@ -76,4 +78,9 @@ if(ASTRA_BUILD_TESTS)
     target_compile_options(astra-manifest-tests PRIVATE /W4 /permissive- /utf-8)
     target_link_libraries(astra-manifest-tests PRIVATE astra_core)
     add_test(NAME astra-android-manifest COMMAND astra-manifest-tests)
+
+    add_executable(astra-google-services-tests tests/google_services_tests.cpp)
+    target_compile_options(astra-google-services-tests PRIVATE /W4 /permissive- /utf-8)
+    target_link_libraries(astra-google-services-tests PRIVATE astra_core)
+    add_test(NAME astra-google-services COMMAND astra-google-services-tests)
 endif()

@@ -156,7 +156,12 @@ void RunSelected(HWND window, LauncherState& state) {
                            L" --package " + QuoteArgument(app.package_path.wstring()) +
                            L" --data " + QuoteArgument(app.data_path.wstring()) +
                            L" --name " + QuoteArgument(app.display_name) +
-                           L" --launcher " + QuoteArgument(app.launcher_activity);
+                           L" --launcher " + QuoteArgument(app.launcher_activity) +
+                           L" --services " +
+                               QuoteArgument(app.google_services_required) +
+                           L" --service-state " +
+                               QuoteArgument(app.google_services_provider +
+                                             L":" + app.google_services_state);
     std::vector<wchar_t> mutable_command(command.begin(), command.end());
     mutable_command.push_back(L'\0');
 

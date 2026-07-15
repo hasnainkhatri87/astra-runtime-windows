@@ -11,6 +11,9 @@ struct InstalledApp {
     std::wstring display_name;
     std::wstring package_name;
     std::wstring launcher_activity;
+    std::wstring google_services_required;
+    std::wstring google_services_provider;
+    std::wstring google_services_state;
     std::filesystem::path package_path;
     std::filesystem::path data_path;
     std::wstring container_sha256;

@@ -15,6 +15,8 @@ struct RuntimeState {
     std::filesystem::path data;
     std::wstring name{L"Application"};
     std::wstring launcher;
+    std::wstring services;
+    std::wstring service_state;
 };
 
 RuntimeState ParseArguments() {
@@ -35,6 +37,10 @@ RuntimeState ParseArguments() {
             state.name = value;
         } else if (key == L"--launcher") {
             state.launcher = value;
+        } else if (key == L"--services") {
+            state.services = value;
+        } else if (key == L"--service-state") {
+            state.service_state = value;
         }
     }
     LocalFree(arguments);
@@ -67,7 +73,10 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message,
                 text += L"Installed package: " + state->name + L"\r\n";
                 text += L"Package: " + state->package.wstring() + L"\r\n";
                 text += L"Private data: " + state->data.wstring() + L"\r\n";
-                text += L"Declared launcher: " + state->launcher + L"\r\n\r\n";
+                text += L"Declared launcher: " + state->launcher + L"\r\n";
+                text += L"Google APIs required: " + state->services + L"\r\n";
+                text += L"Service provider state: " + state->service_state +
+                        L"\r\n\r\n";
             }
             text +=
                 L"The Windows host, install flow, and process boundary are active.\r\n"

@@ -18,7 +18,10 @@ The current native Windows build provides this real workflow:
 6. Root `classes*.dex` payloads are freshly extracted and checked for recognized
    DEX format, bounded header/table/map ranges, SHA-1 signature, and Adler-32
    checksum.
-7. The installed package appears in the native launcher. **Run** currently opens
+7. Verified DEX string tables are scanned for Google core, Maps, location,
+   authentication, cloud messaging, billing, and Play Integrity dependencies;
+   the required provider state is saved per app.
+8. The installed package appears in the native launcher. **Run** currently opens
    the honest native runtime boundary; it does not yet execute an Android
    Activity.
 
@@ -30,7 +33,9 @@ The supplied Foodpanda 26.27.0 APKM passed this flow locally on 2026-07-15:
 - portable CLI exited successfully without uploading the APKM.
 
 Exact evidence is recorded in
-[docs/FOODPANDA_M2_RESULTS.md](docs/FOODPANDA_M2_RESULTS.md).
+[docs/FOODPANDA_M2_RESULTS.md](docs/FOODPANDA_M2_RESULTS.md). The Google-service
+provider contract and its legal/security limits are documented in
+[docs/GOOGLE_SERVICES.md](docs/GOOGLE_SERVICES.md).
 
 This is a completed package-trust and managed-code intake milestone, not a
 completed Android execution engine. ART/DEX execution, Android framework APIs,
@@ -51,6 +56,7 @@ Command-line installation is also available:
 ```powershell
 .\astra-cli.exe install "C:\Path\application.apkm"
 .\astra-cli.exe list
+.\astra-cli.exe services
 ```
 
 ## No large local builder
@@ -81,8 +87,12 @@ cmake --install out/build/win-x64-release --config Release
 - Direct native CPU execution requires an ABI matching the Windows host. ARM-only
   applications need a separately labelled instruction translator or cannot run
   in strict direct mode.
-- Google Play Store and Google Mobile Services are not included. Distribution of
-  GMS requires Google's licensing and device compatibility approval.
+- Google API requirements and provider state are now detected and reported.
+  The open-services framework bridge is not runnable yet. Proprietary Google
+  Play Store/GMS binaries are not included; Google says GMS requires a license
+  and Android compatibility approval.
+- Play Integrity is reported unavailable on this Windows compatibility runtime;
+  Astra never fabricates an integrity verdict or certified-device identity.
 - Passing package intake does not imply that an app can render or use network,
   location, WebView, notifications, login, or payments yet.
 

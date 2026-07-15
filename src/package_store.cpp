@@ -3,7 +3,7 @@
 #include "astra/apk_signature.hpp"
 #include "astra/android_manifest.hpp"
 #include "astra/dex_catalog.hpp"
-
+#include "astra/google_services.hpp"
 #include "astra/package_bundle.hpp"
 
 #include "astra/sha256.hpp"
@@ -191,6 +191,8 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
             result.message = dex_catalog.message;
             return result;
         }
+        const auto google_services =
+            AnalyzeGoogleServiceRequirements(dex_catalog.dex_files);
         const auto metadata = app_root / L"app.ini";
         WriteIni(metadata, L"id", id);
         WriteIni(metadata, L"display_name", display_name);
@@ -211,15 +213,26 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
                  std::to_wstring(provision.selected_apks.size()));
         WriteIni(metadata, L"dex_count",
                  std::to_wstring(dex_catalog.dex_files.size()));
+        WriteIni(metadata, L"google_services_required",
+                 google_services.required_services);
+        WriteIni(metadata, L"google_services_provider",
+                 google_services.provider_id);
+        WriteIni(metadata, L"google_services_state",
+                 google_services.provider_state);
+        WriteIni(metadata, L"play_integrity_available",
+                 google_services.play_integrity_available ? L"true" : L"false");
 
         result.ok = true;
         result.message = provision.message +
                          L" All selected APK v2 signatures and signed content digests verified. " +
                          android_manifest.message + L" " +
-                         dex_catalog.message;
+                         dex_catalog.message + L" " + google_services.message;
         result.app = {id, display_name, android_manifest.package_name,
-                      android_manifest.launcher_activity, destination,
-                      data_root, sha256};
+                      android_manifest.launcher_activity,
+                      google_services.required_services,
+                      google_services.provider_id,
+                      google_services.provider_state,
+                      destination, data_root, sha256};
         return result;
     } catch (const std::exception&) {
         result.message = L"Installation failed while validating or copying the package.";
@@ -249,6 +262,21 @@ std::vector<InstalledApp> ListInstalledApps() {
             app.display_name = ReadIni(metadata, L"display_name");
             app.package_name = ReadIni(metadata, L"package_name");
             app.launcher_activity = ReadIni(metadata, L"launcher_activity");
+            app.google_services_required =
+                ReadIni(metadata, L"google_services_required");
+            app.google_services_provider =
+                ReadIni(metadata, L"google_services_provider");
+            app.google_services_state =
+                ReadIni(metadata, L"google_services_state");
+            if (app.google_services_required.empty()) {
+                app.google_services_required = L"not-analyzed";
+            }
+            if (app.google_services_provider.empty()) {
+                app.google_services_provider = L"none";
+            }
+            if (app.google_services_state.empty()) {
+                app.google_services_state = L"not-analyzed";
+            }
             app.package_path = ReadIni(metadata, L"package_path");
             app.data_path = ReadIni(metadata, L"data_path");
             app.container_sha256 = ReadIni(metadata, L"container_sha256");

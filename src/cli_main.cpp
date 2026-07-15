@@ -1,4 +1,5 @@
 #include "astra/package_store.hpp"
+#include "astra/google_services.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -10,7 +11,8 @@ void PrintUsage() {
     std::wcout
         << L"Astra package utility\n\n"
         << L"  astra-cli install <package.apk|apkm|apks|xapk>\n"
-        << L"  astra-cli list\n";
+        << L"  astra-cli list\n"
+        << L"  astra-cli services\n";
 }
 
 }  // namespace
@@ -35,6 +37,12 @@ int wmain(int argument_count, wchar_t** arguments) {
         std::wcout << L"ID: " << result.app.id << L'\n'
                    << L"Android package: " << result.app.package_name << L'\n'
                    << L"Launcher Activity: " << result.app.launcher_activity << L'\n'
+                   << L"Google APIs required: "
+                   << result.app.google_services_required << L'\n'
+                   << L"Service provider: "
+                   << result.app.google_services_provider << L'\n'
+                   << L"Provider state: "
+                   << result.app.google_services_state << L'\n'
                    << L"Package file: " << result.app.package_path.wstring() << L'\n'
                    << L"Data: " << result.app.data_path.wstring() << L'\n'
                    << L"SHA-256: " << result.app.container_sha256 << L'\n';
@@ -46,8 +54,15 @@ int wmain(int argument_count, wchar_t** arguments) {
         for (const auto& app : apps) {
             std::wcout << app.id << L'\t' << app.package_name << L'\t'
                        << app.launcher_activity << L'\t'
+                       << app.google_services_provider << L'\t'
+                       << app.google_services_state << L'\t'
                        << app.package_path.wstring() << L'\n';
         }
+        return 0;
+    }
+
+    if (command == L"services") {
+        std::wcout << astra::GoogleServicesPolicySummary();
         return 0;
     }
 
