@@ -1,7 +1,16 @@
 # Third-party notices
 
-The bootstrap build currently links only against Windows system libraries and
-contains no third-party source code.
+## zlib 1.3.1
 
-Future AOSP, ART, ANGLE, compression, cryptography, and compatibility-layer
-components must be pinned, audited, and listed here before distribution.
+Copyright (C) 1995-2024 Jean-loup Gailly and Mark Adler.
+
+Source: https://github.com/madler/zlib/tree/v1.3.1
+License: zlib License
+
+zlib is compiled statically into Astra for bounded DEFLATE extraction. The
+software is provided "as-is", without express or implied warranty. This product
+must not misrepresent the origin of zlib, altered versions must be marked, and
+this notice must not be removed from source distributions.
+
+Future AOSP, ART, ANGLE, cryptography, and compatibility-layer components must
+be pinned, audited, and added here before distribution.

@@ -1,5 +1,7 @@
 #include "astra/package_store.hpp"
 
+#include "astra/package_bundle.hpp"
+
 #include "astra/sha256.hpp"
 
 #include <windows.h>
@@ -138,16 +140,25 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
                                        std::filesystem::copy_options::none);
         }
 
+        const auto provision = ProvisionPackageSplits(destination, app_root);
+        if (!provision.ok) {
+            result.message = provision.message;
+            return result;
+        }
+
         const auto metadata = app_root / L"app.ini";
         WriteIni(metadata, L"id", id);
         WriteIni(metadata, L"display_name", display_name);
         WriteIni(metadata, L"package_path", destination.wstring());
         WriteIni(metadata, L"data_path", data_root.wstring());
         WriteIni(metadata, L"container_sha256", sha256);
-        WriteIni(metadata, L"validation", L"container-hash-only");
+        WriteIni(metadata, L"validation", L"container-indexed-crc-verified");
+        WriteIni(metadata, L"selected_split_count",
+                 std::to_wstring(provision.selected_apks.size()));
 
         result.ok = true;
-        result.message = L"Package installed locally. Android signature and split verification are the next runtime milestone.";
+        result.message = provision.message +
+                         L" Android v2/v3 signature verification is the next trust gate.";
         result.app = {id, display_name, destination, data_root, sha256};
         return result;
     } catch (const std::exception&) {
