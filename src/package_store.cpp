@@ -1,6 +1,7 @@
 #include "astra/package_store.hpp"
 
 #include "astra/apk_signature.hpp"
+#include "astra/dex_catalog.hpp"
 
 #include "astra/package_bundle.hpp"
 
@@ -173,6 +174,12 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
             }
             signer_value += signer;
         }
+        const auto dex_catalog =
+            CatalogDexPayloads(provision.selected_apks, app_root);
+        if (!dex_catalog.ok) {
+            result.message = dex_catalog.message;
+            return result;
+        }
         const auto metadata = app_root / L"app.ini";
         WriteIni(metadata, L"id", id);
         WriteIni(metadata, L"display_name", display_name);
@@ -183,10 +190,13 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
         WriteIni(metadata, L"signer_sha256", signer_value);
         WriteIni(metadata, L"selected_split_count",
                  std::to_wstring(provision.selected_apks.size()));
+        WriteIni(metadata, L"dex_count",
+                 std::to_wstring(dex_catalog.dex_files.size()));
 
         result.ok = true;
         result.message = provision.message +
-                         L" All selected APK v2 signatures and signed content digests verified.";
+                         L" All selected APK v2 signatures and signed content digests verified. " +
+                         dex_catalog.message;
         result.app = {id, display_name, destination, data_root, sha256};
         return result;
     } catch (const std::exception&) {

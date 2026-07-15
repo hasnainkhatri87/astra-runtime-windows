@@ -20,6 +20,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(astra_core STATIC
     src/package_store.cpp
     src/apk_signature.cpp
+    src/dex_catalog.cpp
     src/package_bundle.cpp
     src/sha256.cpp
     src/zip_archive.cpp
@@ -64,4 +65,9 @@ if(ASTRA_BUILD_TESTS)
     target_compile_options(astra-zip-tests PRIVATE /W4 /permissive- /utf-8)
     target_link_libraries(astra-zip-tests PRIVATE astra_core)
     add_test(NAME astra-zip-archive COMMAND astra-zip-tests)
+
+    add_executable(astra-dex-tests tests/dex_catalog_tests.cpp)
+    target_compile_options(astra-dex-tests PRIVATE /W4 /permissive- /utf-8)
+    target_link_libraries(astra-dex-tests PRIVATE astra_core)
+    add_test(NAME astra-dex-catalog COMMAND astra-dex-tests)
 endif()
