@@ -1,4 +1,4 @@
-# Foodpanda signed-package and DEX intake result
+# Foodpanda signed-package, manifest, DEX, and service-profile result
 
 Test date: 2026-07-15
 Package: `com.global.foodpanda.android` 26.27.0 (`262700094`)
@@ -6,17 +6,23 @@ Test boundary: local, offline package intake only
 
 ## Proven result
 
-The portable Windows CLI built from commit `929d343` completed successfully:
+The warning-clean portable Windows CLI built from commit `974bdcc` completed
+successfully:
 
 ```text
 Selected and CRC-verified 4 APK split(s) for x86-64 Windows.
 All selected APK v2 signatures and signed content digests verified.
+Parsed signed manifest for com.global.foodpanda.android (SDK 29-35).
+Launcher: com.deliveryhero.applaunch.launcher.LauncherActivity.
 Validated 8 DEX payload(s).
+Detected Google service APIs: core,maps,location,authentication,cloud-messaging,billing.
+Open Services provider selected; runtime bridge pending.
 ```
 
-- GitHub Actions run: `29437425427` (run 8), success
+- GitHub Actions run: `29441998296` (run 14), success, 6/6 tests
+- Astra MSVC warnings: none
 - Portable ZIP SHA-256:
-  `ba1c66622a7473167a31f4bf59ff2f46c22516546e9fb9c2d48a1399c54b7df2`
+  `fe44db96bab97aa014da33caed320dc8052e3910be5bc873df8dd4510717d120`
 - APKM SHA-256:
   `317be58c4ed6d65f49e60d62eb4b5aca70b870d35c92fe41e711b0eb72f2112b`
 - APK signer SHA-256:
@@ -40,6 +46,29 @@ For every file, Astra checked DEX magic/version, declared size and endianness,
 fixed table bounds, data/map bounds and consistency, SHA-1 signature, and
 Adler-32 checksum after CRC-verified extraction from a signed APK.
 
+## Resolved application and service profile
+
+- Package: `com.global.foodpanda.android`
+- Launcher: `com.deliveryhero.applaunch.launcher.LauncherActivity`
+- SDK range: 29-35
+- Required APIs: core, Maps, location, authentication, cloud messaging, billing
+- Provider: `open-services`
+- Provider state: `runtime-bridge-pending`
+- Play Integrity available: `false`
+
+The detector did not find a direct Play Integrity dependency in these eight DEX
+files. Astra still never claims or fabricates a certified-device verdict.
+
+## Managed execution proof
+
+The same run passed a checksum-valid DEX v039 fixture through the production
+SHA-1/Adler-32 verifier, resolved `LAstraProbe;->answer()I`, executed real
+`const/16`, `add-int/lit8`, and `return` instructions, and obtained `42`.
+Conditional branches, division-by-zero rejection, unsupported-opcode rejection,
+checksum tampering, and an infinite-loop step limit also passed.
+
+This proves a bounded DEX interpreter path; it does not prove Foodpanda execution.
+
 ## Native idle footprint
 
 Measured over a three-second idle sample on the first Windows 11 test PC:
@@ -56,4 +85,5 @@ ART, framework, graphics, WebView, or Foodpanda application footprint.
 
 No Foodpanda DEX method or launcher Activity executed in this milestone. There
 was no login, network transaction, order, payment, integrity bypass, TLS bypass,
-or simulated Foodpanda UI. The next gate is a real managed-code execution proof.
+or simulated Foodpanda UI. The next gate is a real Android test Activity frame,
+followed by Foodpanda cold launch and callable framework/open-service bridges.

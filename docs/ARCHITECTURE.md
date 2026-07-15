@@ -67,7 +67,7 @@ They are excluded from source control and cloud build artifacts.
 | M1A package structure | Complete for tested APKM | Bounded container parser, split selection, CRC extraction |
 | M1B package trust | Partial | V2 signed content/common signer and signed binary manifest parsing complete; v3 pending |
 | M1C DEX intake | Complete for Foodpanda | Recognized DEX, bounded tables/map, SHA-1 and Adler-32; 8 real payloads pass |
-| M2 managed execution | Pending | Execute a synthetic unmodified DEX entry under the Windows runtime and prove its result |
+| M2 managed execution | Complete (bounded proof) | Checksum-valid DEX `()I` method executed integer/branch bytecode and returned `42`; error/loop bounds passed |
 | M3 first frame | Pending | An Android View/Compose test Activity renders through the Windows surface |
 | M4 Foodpanda cold launch | Pending | Unmodified launcher Activity reaches a rendered offline frame |
 | M5 platform services | Pending | Input, storage, network, WebView, location, and notifications |
@@ -78,8 +78,9 @@ They are excluded from source control and cloud build artifacts.
 See [GOOGLE_SERVICES.md](GOOGLE_SERVICES.md) for the provider contract and
 Play Integrity boundary.
 
-The next execution proof must run real DEX instructions. A painted imitation of
-an Android screen does not satisfy M2.
+M2 runs real DEX instructions; it is intentionally not presented as full ART.
+The next gate is M3: class/object/runtime services plus a real Android test
+Activity frame. A painted imitation does not satisfy that gate.
 
 ## Performance policy
 

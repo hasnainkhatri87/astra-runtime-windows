@@ -29,7 +29,10 @@ The supplied Foodpanda 26.27.0 APKM passed this flow locally on 2026-07-15:
 
 - 4 compatible APK splits selected and CRC-verified;
 - all 4 v2 signatures and signed content digests verified with one signer set;
+- signed manifest resolved `com.deliveryhero.applaunch.launcher.LauncherActivity`;
 - 8 DEX v039 payloads structurally and integrity-validated after signed extraction;
+- Google API profile detected as core, Maps, location, authentication, cloud
+  messaging, and billing, with `open-services:runtime-bridge-pending`;
 - portable CLI exited successfully without uploading the APKM.
 
 Exact evidence is recorded in
@@ -37,11 +40,12 @@ Exact evidence is recorded in
 provider contract and its legal/security limits are documented in
 [docs/GOOGLE_SERVICES.md](docs/GOOGLE_SERVICES.md).
 
-This is a completed package-trust and managed-code intake milestone, not a
-completed Android execution engine. ART/DEX execution, Android framework APIs,
-ELF/Bionic loading, graphics, and app lifecycle services are still pending. The
-project will not display a fake Foodpanda screen or claim its launcher Activity
-ran before that is true.
+This includes a real managed-code proof: Astra resolves a checksum-valid DEX
+static `()I` method and executes a bounded integer/branch opcode subset, returning
+`42` in CI. It is not a completed Android execution engine. Full ART semantics,
+Android framework APIs, ELF/Bionic loading, graphics, and app lifecycle services
+are still pending. The project will not display a fake Foodpanda screen or claim
+its launcher Activity ran before that is true.
 
 ## Use the portable tool
 
@@ -57,6 +61,7 @@ Command-line installation is also available:
 .\astra-cli.exe install "C:\Path\application.apkm"
 .\astra-cli.exe list
 .\astra-cli.exe services
+.\astra-cli.exe dex-execute "C:\Path\probe.dex" "Lexample/Probe;" "answer"
 ```
 
 ## No large local builder
@@ -84,6 +89,9 @@ cmake --install out/build/win-x64-release --config Release
   accepted.
 - Standard APK DEX versions 035 and 037-040 are accepted. Experimental DEX v041
   containers are explicitly rejected until their container rules are supported.
+- The managed executor currently supports only verified static no-argument
+  integer methods and a bounded integer/branch opcode subset. It is an M2 proof,
+  not enough to start an Android Activity or run Foodpanda yet.
 - Direct native CPU execution requires an ABI matching the Windows host. ARM-only
   applications need a separately labelled instruction translator or cannot run
   in strict direct mode.
