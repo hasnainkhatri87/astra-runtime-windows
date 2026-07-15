@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "purpose": "local-interoperability-test-only",
+  "package": "com.global.foodpanda.android",
+  "versionName": "26.27.0",
+  "versionCode": 262700094,
+  "minSdk": 29,
+  "targetSdk": 35,
+  "preferredAbi": "x86_64",
+  "containerSha256": "317be58c4ed6d65f49e60d62eb4b5aca70b870d35c92fe41e711b0eb72f2112b",
+  "baseApkSha256": "72479bf23f30693763aed31c9ce034e81ac2f418de0184c7b57d9cf897099efe",
+  "x86_64SplitSha256": "d4077e4f28e2303c2f64b3427424281a217c78049304429e36c9df3a087e6a04",
+  "signerSha256": "af472590adc7f390d8aa24bdb2b049591efdf35b0a0837582890aa7d2276c663",
+  "launcherActivity": "com.deliveryhero.applaunch.launcher.LauncherActivity",
+  "networkTransactionsAllowed": false,
+  "notes": "The profile records prior read-only analysis. The bootstrap importer currently verifies the outer container hash only; Android v2/v3 verification is not yet wired into the executable."
+}

@@ -1,0 +1,14 @@
+*.apk
+*.apkm
+*.apks
+*.aab
+*.xapk
+
+build/
+out/
+.vs/
+CMakeUserPresets.json
+
+local-packages/
+provisioned/
+app-cache/
