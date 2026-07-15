@@ -17,4 +17,3 @@ ProvisionResult ProvisionPackageSplits(
     const std::filesystem::path& app_root);
 
 }  // namespace astra
-

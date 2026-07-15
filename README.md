@@ -11,13 +11,15 @@ The bootstrap build provides a real native Windows workflow:
 1. Run `astra.exe`.
 2. Click **Install package**.
 3. Choose an `.apk`, `.apkm`, `.apks`, or `.xapk` file you are authorized to use.
-4. Astra validates the container type, streams a SHA-256 hash, copies the package
-   into an isolated local application directory, and displays it in the library.
+4. Astra indexes the ZIP directory, rejects unsafe/encrypted/oversized entries,
+   streams a SHA-256 hash, selects x86-64/English/xhdpi APK splits, and
+   extracts them with bounded DEFLATE and CRC verification.
 5. Select the installed package and click **Run**.
 6. `astra-runtime.exe` opens the package's native Windows host surface and private
    data boundary.
 
-This is milestone M0, not yet a completed Android execution engine. The host
+The Windows host milestone M0 is complete and the structural portion of M1 is
+complete. This is not yet a completed Android execution engine. The host
 window explicitly reports that ART/DEX and Android framework execution are not
 connected. The project will not display a fake application screen or claim an
 Android activity is running before that is true.
@@ -47,6 +49,13 @@ cmake --install out/build/win-x64-release --config Release
 
 No Android Studio or Android SDK is used by the bootstrap build.
 
+For diagnostics and automation, the same installer is available without the GUI:
+
+```powershell
+.\astra-cli.exe install "C:\Path\application.apkm"
+.\astra-cli.exe list
+```
+
 ## Foodpanda test package
 
 The supplied Foodpanda APKM remains outside this repository. The recorded local
@@ -64,8 +73,9 @@ application security policy.
 - Google Play Store and Google Mobile Services are not included.
 - User-provided packages and application data stay local.
 - Packages are preserved unmodified.
-- The current importer checks the outer ZIP signature and SHA-256 only. Android
-  APK Signature Scheme v2/v3 verification and split extraction are M1 work.
+- The importer performs bounded structural parsing, split selection, extraction,
+  CRC verification, and whole-container SHA-256. Android APK Signature Scheme
+  v2/v3 cryptographic verification remains the final M1 trust gate.
 - Astra is not affiliated with or endorsed by Google, Foodpanda, or Delivery Hero.
 
 “Android” is used only as a descriptive trademark of Google LLC.

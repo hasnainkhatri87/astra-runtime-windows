@@ -39,11 +39,15 @@ add_executable(astra WIN32 src/launcher_main.cpp)
 target_compile_options(astra PRIVATE /W4 /permissive- /utf-8)
 target_link_libraries(astra PRIVATE astra_core comctl32 ole32 shell32)
 
+add_executable(astra-cli src/cli_main.cpp)
+target_compile_options(astra-cli PRIVATE /W4 /permissive- /utf-8)
+target_link_libraries(astra-cli PRIVATE astra_core)
+
 add_executable(astra-runtime WIN32 src/runtime_main.cpp)
 target_compile_options(astra-runtime PRIVATE /W4 /permissive- /utf-8)
 target_link_libraries(astra-runtime PRIVATE astra_core comctl32 shell32)
 
-install(TARGETS astra astra-runtime
+install(TARGETS astra astra-cli astra-runtime
     RUNTIME DESTINATION .
 )
 install(FILES README.md THIRD_PARTY_NOTICES.md DESTINATION .)
