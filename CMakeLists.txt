@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(astra_core STATIC
+    src/android_framework.cpp
     src/package_store.cpp
     src/android_manifest.cpp
     src/apk_signature.cpp
@@ -48,7 +49,7 @@ add_executable(astra-cli src/cli_main.cpp)
 target_compile_options(astra-cli PRIVATE /W4 /permissive- /utf-8)
 target_link_libraries(astra-cli PRIVATE astra_core)
 
-add_executable(astra-runtime WIN32 src/runtime_main.cpp)
+add_executable(astra-runtime WIN32 src/android_runtime_main.cpp)
 target_compile_options(astra-runtime PRIVATE /W4 /permissive- /utf-8)
 target_link_libraries(astra-runtime PRIVATE astra_core comctl32 shell32)
 
@@ -89,4 +90,9 @@ if(ASTRA_BUILD_TESTS)
     target_compile_options(astra-dex-executor-tests PRIVATE /W4 /permissive- /utf-8)
     target_link_libraries(astra-dex-executor-tests PRIVATE astra_core)
     add_test(NAME astra-dex-executor COMMAND astra-dex-executor-tests)
+
+    add_executable(astra-android-framework-tests tests/android_framework_tests.cpp)
+    target_compile_options(astra-android-framework-tests PRIVATE /W4 /permissive- /utf-8)
+    target_link_libraries(astra-android-framework-tests PRIVATE astra_core)
+    add_test(NAME astra-android-framework COMMAND astra-android-framework-tests)
 endif()
