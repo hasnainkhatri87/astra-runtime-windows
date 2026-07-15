@@ -107,7 +107,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show_command) {
         return 3;
     }
 
-    const std::wstring title = state.name + L" — Astra";
+    const std::wstring title = state.name + L" - Astra";
     HWND window = CreateWindowExW(0, kWindowClass, title.c_str(),
         WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 600, 760,
         nullptr, nullptr, instance, &state);

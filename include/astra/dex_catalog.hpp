@@ -29,4 +29,3 @@ DexCatalogResult CatalogDexPayloads(
     const std::filesystem::path& app_root);
 
 }  // namespace astra
-

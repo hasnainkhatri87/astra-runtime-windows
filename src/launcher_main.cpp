@@ -283,7 +283,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show_command) {
     }
 
     HWND window = CreateWindowExW(0, kWindowClass,
-        L"Astra — compatibility runtime for Android application packages",
+        L"Astra - compatibility runtime for Android application packages",
         WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 760, 520,
         nullptr, nullptr, instance, nullptr);
     if (!window) {

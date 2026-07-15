@@ -2,36 +2,36 @@
 
 ## Product boundary
 
-Astra is an experimental Windows compatibility runtime for Android application
-packages. It is not a virtual phone, a virtual machine, or a complete Android
-system image. Each application is intended to appear as an independent Windows
-application.
+Astra is a Windows userspace compatibility runtime for Android application
+packages. It is not a virtual phone, virtual machine, or complete Android system
+image. The intended result is one independent Windows process tree per app.
 
-The compatibility goal is broad application coverage. Literal support for every
-application is not technically possible under a strict no-CPU-translation rule:
-an ARM-only native library cannot execute on an x86-64 processor. Astra's core
-mode therefore executes matching host instructions directly. An optional
-instruction translator, if ever added, must be labelled separately.
-
-## User flow
+"Direct" means that matching x86/x86-64 native instructions execute on the host
+CPU and Android OS services are mapped to Windows services. DEX is managed
+bytecode and still requires an Android-compatible runtime such as a Windows port
+of ART or a compatible execution engine. An ARM ELF library cannot execute on an
+x86-64 CPU without instruction translation.
 
 ```text
 User-owned APK/APKM/APKS/XAPK
               |
               v
-    Package validation and split selection
+  Bounded parser + signed split verification
               |
               v
-  Local per-app package and private data store
+    Verified DEX + native library inventory
               |
               v
-       Astra Windows launcher
+     Per-app Windows process and data root
               |
               v
-   Native runtime host + ART/DEX engine
+      ART/DEX execution + JNI boundary
               |
               v
  Android APIs mapped to Windows services
+              |
+              v
+  ANGLE/Direct3D surface in a Windows window
 ```
 
 Packages, account details, and application data remain on the user's computer.
@@ -39,41 +39,55 @@ They are excluded from source control and cloud build artifacts.
 
 ## Runtime modules
 
-- **Package store:** container safety checks, APK Signature Scheme validation,
-  manifest/resource parsing, and split selection.
-- **ART host:** DEX interpreter/JIT/AOT integration and JNI boundary.
-- **Native loader:** x86/x86-64 ELF loading plus Bionic/NDK symbol mapping.
-- **Framework services:** activity, package, permission, content, Binder-like IPC,
-  lifecycle, storage, notifications, location, and intent routing.
-- **Graphics:** Surface/Canvas/OpenGL ES translated through ANGLE to Direct3D.
-- **Web:** Android WebView behavior backed by a versioned Chromium/WebView layer;
-  WebView2 can be used only where behavior is compatible.
-- **Security:** restricted Windows token/AppContainer research, Job Objects,
-  per-app storage, permission prompts, and no host filesystem access by default.
-- **GMS contract:** licensed integration boundary only. Google Play and Google
-  Mobile Services are not AOSP and cannot be bundled without permission.
+- **Package trust:** bounded ZIP parsing, split selection, APK signing
+  verification, AXML/resources, and immutable package identity.
+- **Managed runtime:** DEX verifier, class linker, garbage collector,
+  interpreter/JIT/AOT, exceptions, reflection, and Java/JNI contracts. Reusing a
+  pinned, audited ART revision is preferred to inventing incompatible Java
+  semantics.
+- **Native loader:** x86/x86-64 ELF mapping, relocations, TLS, and Bionic/NDK
+  symbol compatibility on Windows.
+- **Framework services:** Activity lifecycle, package and permission services,
+  storage, intents, Binder-like IPC, notifications, location, and input.
+- **Graphics:** Surface/Canvas/OpenGL ES translation through ANGLE to Direct3D.
+- **Web:** a versioned Chromium/WebView compatibility layer. WebView2 is usable
+  only where observable Android WebView behavior remains compatible.
+- **Security:** Job Objects, restricted tokens/AppContainer research, per-app
+  storage, permission prompts, and no arbitrary host filesystem access.
+- **GMS boundary:** licensed integration only. Google Play and Google Mobile
+  Services are not AOSP and cannot be bundled without authorization.
 
-## Milestones and truthful gates
+## Truthful milestone gates
 
-| Gate | Required evidence |
-|---|---|
-| M0 Windows host | Install package, display library, open isolated host window |
-| M1 Package trust | Parse AXML, verify APK v2/v3, select signed splits |
-| M2 Managed execution | ART loads DEX and calls a synthetic Activity |
-| M3 First frame | Android View/Compose renders through the Windows surface |
-| M4 Foodpanda cold launch | Unmodified launcher activity renders without network |
-| M5 Platform services | Input, storage, network, WebView, location, notifications |
-| M6 Broader apps | Compatibility database driven by legal user-supplied packages |
-| M7 Google services | Only after written licensing and compatibility approval |
+| Gate | State | Required evidence |
+|---|---|---|
+| M0 Windows host | Complete | Install/list a package and open a separate native host process |
+| M1A package structure | Complete for tested APKM | Bounded container parser, split selection, CRC extraction |
+| M1B package trust | Partial | V2 signed content/common signer complete; v3 and binary manifest validation pending |
+| M1C DEX intake | Complete for Foodpanda | Recognized DEX, bounded tables/map, SHA-1 and Adler-32; 8 real payloads pass |
+| M2 managed execution | Pending | Execute a synthetic unmodified DEX entry under the Windows runtime and prove its result |
+| M3 first frame | Pending | An Android View/Compose test Activity renders through the Windows surface |
+| M4 Foodpanda cold launch | Pending | Unmodified launcher Activity reaches a rendered offline frame |
+| M5 platform services | Pending | Input, storage, network, WebView, location, and notifications |
+| M6 broader apps | Pending | Compatibility database based on legal user-supplied packages |
+| M7 Google services | Licensing gate | Written licensing and compatibility approval |
 
-The bootstrap repository completes M0. It must not claim M2 or later until an
-unmodified activity actually executes.
+The next execution proof must run real DEX instructions. A painted imitation of
+an Android screen does not satisfy M2.
 
 ## Performance policy
 
-The launcher uses a blocking Windows message loop and therefore consumes no
-busy-loop CPU while idle. Package hashing is streamed in 1 MiB chunks. The
-runtime will be loaded on demand and terminated with the application.
+The launcher and host use blocking Windows message loops and no idle polling.
+Package hashing and integrity validation are streamed in bounded buffers. Runtime
+components load on demand and terminate with the app.
 
-Runtime overhead and application memory must be measured independently. A large
-application can still require substantial memory even if Astra itself is small.
+Host overhead and app memory are reported separately. Foodpanda's eight DEX
+files occupy about 69 MiB on disk after verified extraction; they are not all
+loaded into RAM by the current intake step.
+
+## Upstream and licensing policy
+
+Every reused runtime component must be pinned, license-audited, reproducibly
+built, and listed in `THIRD_PARTY_NOTICES.md`. AOSP/ART is Apache-2.0 overall but
+its dependency graph must be reviewed component by component. Google Play/GMS
+bits are outside this open-source runtime boundary.

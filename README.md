@@ -2,43 +2,68 @@
 
 Astra is an experimental, portable Windows compatibility runtime for
 user-provided Android application packages. Foodpanda is the first validation
-target; application-specific logic is not built into Astra.
+target; no application-specific behavior is built into Astra.
 
-## Current executable milestone
+## Verified executable milestone
 
-The bootstrap build provides a real native Windows workflow:
+The current native Windows build provides this real workflow:
 
 1. Run `astra.exe`.
 2. Click **Install package**.
 3. Choose an `.apk`, `.apkm`, `.apks`, or `.xapk` file you are authorized to use.
-4. Astra indexes the ZIP directory, rejects unsafe/encrypted/oversized entries,
-   streams a SHA-256 hash, selects x86-64/English/xhdpi APK splits, and
-   extracts them with bounded DEFLATE and CRC verification.
-5. Select the installed package and click **Run**.
-6. `astra-runtime.exe` opens the package's native Windows host surface and private
-   data boundary.
+4. Astra safely indexes the ZIP container, selects x86-64/English/xhdpi splits,
+   and extracts them with bounded DEFLATE and CRC verification.
+5. Every selected APK must pass APK Signature Scheme v2 signature and signed
+   content verification, and all selected splits must have the same signer set.
+6. Root `classes*.dex` payloads are freshly extracted and checked for recognized
+   DEX format, bounded header/table/map ranges, SHA-1 signature, and Adler-32
+   checksum.
+7. The installed package appears in the native launcher. **Run** currently opens
+   the honest native runtime boundary; it does not yet execute an Android
+   Activity.
 
-The Windows host milestone M0 is complete and the structural portion of M1 is
-complete. This is not yet a completed Android execution engine. The host
-window explicitly reports that ART/DEX and Android framework execution are not
-connected. The project will not display a fake application screen or claim an
-Android activity is running before that is true.
+The supplied Foodpanda 26.27.0 APKM passed this flow locally on 2026-07-15:
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the gates required to reach
-Foodpanda's first rendered frame and broader APK compatibility.
+- 4 compatible APK splits selected and CRC-verified;
+- all 4 v2 signatures and signed content digests verified with one signer set;
+- 8 DEX v039 payloads structurally and integrity-validated after signed extraction;
+- portable CLI exited successfully without uploading the APKM.
+
+Exact evidence is recorded in
+[docs/FOODPANDA_M2_RESULTS.md](docs/FOODPANDA_M2_RESULTS.md).
+
+This is a completed package-trust and managed-code intake milestone, not a
+completed Android execution engine. ART/DEX execution, Android framework APIs,
+ELF/Bionic loading, graphics, and app lifecycle services are still pending. The
+project will not display a fake Foodpanda screen or claim its launcher Activity
+ran before that is true.
+
+## Use the portable tool
+
+The cloud artifact contains three small native executables:
+
+- `astra.exe`: graphical package installer and application list;
+- `astra-cli.exe`: command-line installer and diagnostics;
+- `astra-runtime.exe`: per-application Windows host process.
+
+Command-line installation is also available:
+
+```powershell
+.\astra-cli.exe install "C:\Path\application.apkm"
+.\astra-cli.exe list
+```
 
 ## No large local builder
 
-The repository includes a GitHub Actions workflow that compiles and tests Astra
-on a temporary Windows cloud runner, then uploads `AstraRuntime-win-x64.zip`.
-The user's PC needs only the downloaded portable ZIP.
+The GitHub Actions workflow compiles and tests Astra on a temporary Windows
+runner and publishes `AstraRuntime-win-x64.zip`. A user needs only the portable
+ZIP; Android Studio and the Android SDK are not required.
 
-The workflow never uploads an APK. Package formats are ignored by Git, rejected
-if accidentally tracked, and checked again before publishing the ZIP artifact.
+The workflow never uploads an APK. Android package formats are ignored by Git,
+rejected if accidentally tracked, and checked again before artifact publishing.
 
-## Local development (optional)
-
-If a developer already has Visual Studio 2022 with C++ and CMake:
+Local development is optional for contributors who already have Visual Studio
+2022 C++ and CMake:
 
 ```powershell
 cmake --preset win-x64-release
@@ -47,35 +72,33 @@ ctest --preset win-x64-release --output-on-failure
 cmake --install out/build/win-x64-release --config Release
 ```
 
-No Android Studio or Android SDK is used by the bootstrap build.
+## Current compatibility limits
 
-For diagnostics and automation, the same installer is available without the GUI:
+- APK Signature Scheme v2 is verified. V3-only and V4-only packages are not yet
+  accepted.
+- Standard APK DEX versions 035 and 037-040 are accepted. Experimental DEX v041
+  containers are explicitly rejected until their container rules are supported.
+- Direct native CPU execution requires an ABI matching the Windows host. ARM-only
+  applications need a separately labelled instruction translator or cannot run
+  in strict direct mode.
+- Google Play Store and Google Mobile Services are not included. Distribution of
+  GMS requires Google's licensing and device compatibility approval.
+- Passing package intake does not imply that an app can render or use network,
+  location, WebView, notifications, login, or payments yet.
 
-```powershell
-.\astra-cli.exe install "C:\Path\application.apkm"
-.\astra-cli.exe list
-```
+## Performance boundary
 
-## Foodpanda test package
+On the first Foodpanda test PC, the idle native launcher used 10.13 MiB working
+set and the idle runtime host used 8.50 MiB; both measured 0.000% machine CPU
+over the sample interval. These are host-only measurements. The eventual ART,
+framework, graphics, and application memory must be measured separately.
 
-The supplied Foodpanda APKM remains outside this repository. The recorded local
-test profile is `policies/foodpanda-26.27.0.test-profile.json`. It identifies the
-x86-64 split, which permits direct CPU execution on x86-64 Windows once the ELF,
-Bionic, JNI, and ART layers are implemented.
+## Foodpanda test policy
 
-The initial test sequence is deliberately limited to package installation,
-offline cold launch, and first-frame rendering. It must not automate login,
-orders, payments, or bypass TLS pinning, fraud controls, identity checks, or
-application security policy.
+The supplied APKM remains outside this repository. The local interoperability
+test stops before login, ordering, payment, or account automation. Astra must not
+bypass TLS pinning, Play Integrity, fraud controls, identity checks, or any app
+security policy.
 
-## Product and licensing status
-
-- Google Play Store and Google Mobile Services are not included.
-- User-provided packages and application data stay local.
-- Packages are preserved unmodified.
-- The importer performs bounded structural parsing, split selection, extraction,
-  CRC verification, and whole-container SHA-256. Android APK Signature Scheme
-  v2/v3 cryptographic verification remains the final M1 trust gate.
-- Astra is not affiliated with or endorsed by Google, Foodpanda, or Delivery Hero.
-
-“Android” is used only as a descriptive trademark of Google LLC.
+Astra is not affiliated with or endorsed by Google, Foodpanda, or Delivery Hero.
+"Android" is used only as a descriptive trademark of Google LLC.

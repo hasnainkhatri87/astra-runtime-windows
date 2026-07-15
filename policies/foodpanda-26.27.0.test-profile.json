@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "purpose": "local-interoperability-test-only",
   "package": "com.global.foodpanda.android",
   "versionName": "26.27.0",
@@ -12,6 +12,10 @@
   "x86_64SplitSha256": "d4077e4f28e2303c2f64b3427424281a217c78049304429e36c9df3a087e6a04",
   "signerSha256": "af472590adc7f390d8aa24bdb2b049591efdf35b0a0837582890aa7d2276c663",
   "launcherActivity": "com.deliveryhero.applaunch.launcher.LauncherActivity",
+  "validatedSelectedSplits": 4,
+  "validatedDexCount": 8,
+  "validatedDexVersion": "039",
+  "lastValidatedDate": "2026-07-15",
   "networkTransactionsAllowed": false,
-  "notes": "The profile records prior read-only analysis. The bootstrap importer currently verifies the outer container hash only; Android v2/v3 verification is not yet wired into the executable."
+  "notes": "The portable CLI verifies bounded extraction, APK v2 signatures and signed content, one common signer set, and structural plus SHA-1/Adler-32 integrity for all eight DEX files. Android Activity execution is not connected yet."
 }
