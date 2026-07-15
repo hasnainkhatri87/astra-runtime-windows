@@ -1,5 +1,7 @@
 #include "astra/package_store.hpp"
 
+#include "astra/apk_signature.hpp"
+
 #include "astra/package_bundle.hpp"
 
 #include "astra/sha256.hpp"
@@ -146,19 +148,45 @@ InstallResult InstallPackage(const std::filesystem::path& source) {
             return result;
         }
 
+        std::vector<std::wstring> common_signers;
+        for (const auto& apk : provision.selected_apks) {
+            const auto signature = VerifyApkV2Signature(apk);
+            if (!signature.ok) {
+                result.message = signature.message;
+                return result;
+            }
+            if (common_signers.empty()) {
+                common_signers = signature.signer_sha256;
+            } else if (common_signers != signature.signer_sha256) {
+                result.message = L"Selected APK splits do not share one signer set.";
+                return result;
+            }
+        }
+        if (common_signers.empty()) {
+            result.message = L"No verified APK signer was found.";
+            return result;
+        }
+        std::wstring signer_value;
+        for (const auto& signer : common_signers) {
+            if (!signer_value.empty()) {
+                signer_value += L";";
+            }
+            signer_value += signer;
+        }
         const auto metadata = app_root / L"app.ini";
         WriteIni(metadata, L"id", id);
         WriteIni(metadata, L"display_name", display_name);
         WriteIni(metadata, L"package_path", destination.wstring());
         WriteIni(metadata, L"data_path", data_root.wstring());
         WriteIni(metadata, L"container_sha256", sha256);
-        WriteIni(metadata, L"validation", L"container-indexed-crc-verified");
+        WriteIni(metadata, L"validation", L"apk-v2-signed-content-verified");
+        WriteIni(metadata, L"signer_sha256", signer_value);
         WriteIni(metadata, L"selected_split_count",
                  std::to_wstring(provision.selected_apks.size()));
 
         result.ok = true;
         result.message = provision.message +
-                         L" Android v2/v3 signature verification is the next trust gate.";
+                         L" All selected APK v2 signatures and signed content digests verified.";
         result.app = {id, display_name, destination, data_root, sha256};
         return result;
     } catch (const std::exception&) {

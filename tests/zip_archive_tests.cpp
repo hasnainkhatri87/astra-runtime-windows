@@ -1,4 +1,5 @@
 #include "astra/package_bundle.hpp"
+#include "astra/apk_signature.hpp"
 #include "astra/zip_archive.hpp"
 
 #include <cstdint>
@@ -105,6 +106,12 @@ int main() {
         ++failures;
     }
 
+const auto unsigned_result =
+        astra::VerifyApkV2Signature(provision.selected_apks[0]);
+    if (unsigned_result.ok) {
+        std::cerr << "FAIL: unsigned synthetic APK passed signature verification\n";
+        ++failures;
+    }
     const auto traversal = root / L"traversal.apkm";
     WriteEmptyStoredZip(traversal, "../escape.apk");
     if (!ThrowsWhenOpening(traversal)) {

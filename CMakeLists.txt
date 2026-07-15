@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(astra_core STATIC
     src/package_store.cpp
+    src/apk_signature.cpp
     src/package_bundle.cpp
     src/sha256.cpp
     src/zip_archive.cpp
@@ -33,7 +34,7 @@ target_compile_definitions(astra_core PUBLIC
 )
 target_compile_options(astra_core PRIVATE /W4 /permissive- /utf-8)
 target_include_directories(astra_core PRIVATE ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
-target_link_libraries(astra_core PUBLIC bcrypt zlibstatic)
+target_link_libraries(astra_core PUBLIC bcrypt crypt32 zlibstatic)
 
 add_executable(astra WIN32 src/launcher_main.cpp)
 target_compile_options(astra PRIVATE /W4 /permissive- /utf-8)
