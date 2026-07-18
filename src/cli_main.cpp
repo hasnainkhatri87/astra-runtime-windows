@@ -1,5 +1,6 @@
 #include "astra/package_store.hpp"
 #include "astra/google_services.hpp"
+#include "astra/android_vm.hpp"
 #include "astra/dex_executor.hpp"
 
 #include <filesystem>
@@ -14,7 +15,10 @@ void PrintUsage() {
         << L"  astra-cli install <package.apk|apkm|apks|xapk>\n"
         << L"  astra-cli list\n"
         << L"  astra-cli services\n"
-        << L"  astra-cli dex-execute <file.dex> <class-descriptor> <method>\n";
+        << L"  astra-cli dex-execute <file.dex> <class-descriptor> <method>\n"
+        << L"  astra-cli vm-status\n"
+        << L"  astra-cli vm-start\n"
+        << L"  astra-cli vm-run <installed-app-id>\n";
 }
 
 bool NarrowAscii(const wchar_t* value, std::string& output) {
@@ -77,6 +81,52 @@ int wmain(int argument_count, wchar_t** arguments) {
     if (command == L"services") {
         std::wcout << astra::GoogleServicesPolicySummary();
         return 0;
+    }
+
+    if (command == L"vm-status") {
+        if (argument_count != 2) {
+            PrintUsage();
+            return 1;
+        }
+        const auto status = astra::InspectAndroidVm();
+        std::wcout << status.message << L'\n'
+                   << L"Runtime root: " << status.runtime_root.wstring() << L'\n'
+                   << L"SDK: " << (status.sdk_ready ? L"ready" : L"missing") << L'\n'
+                   << L"AVD: " << (status.avd_ready ? L"ready" : L"missing") << L'\n'
+                   << L"Firmware virtualization: "
+                   << (status.firmware_virtualization_ready ? L"ready" : L"unavailable") << L'\n'
+                   << L"WHPX acceleration: "
+                   << (status.acceleration_ready ? L"ready" : L"unavailable") << L'\n'
+                   << L"Android device: " << (status.device_ready ? L"running" : L"stopped") << L'\n';
+        return status.sdk_ready && status.avd_ready &&
+                       status.firmware_virtualization_ready && status.acceleration_ready ? 0 : 4;
+    }
+
+    if (command == L"vm-start") {
+        if (argument_count != 2) {
+            PrintUsage();
+            return 1;
+        }
+        const auto result = astra::StartAndroidVm();
+        std::wcout << result.message << L'\n';
+        return result.ok ? 0 : 4;
+    }
+
+    if (command == L"vm-run") {
+        if (argument_count != 3) {
+            PrintUsage();
+            return 1;
+        }
+        const auto apps = astra::ListInstalledApps();
+        for (const auto& app : apps) {
+            if (app.id == arguments[2]) {
+                const auto result = astra::InstallAndRunInAndroidVm(app);
+                std::wcout << result.message << L'\n';
+                return result.ok ? 0 : 4;
+            }
+        }
+        std::wcerr << L"No installed Astra app has that ID. Run astra-cli list first.\n";
+        return 2;
     }
 
     if (command == L"dex-execute") {

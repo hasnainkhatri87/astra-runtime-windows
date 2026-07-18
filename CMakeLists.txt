@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(astra_core STATIC
     src/android_framework.cpp
+    src/android_vm.cpp
     src/package_store.cpp
     src/android_manifest.cpp
     src/apk_signature.cpp
@@ -57,7 +58,8 @@ install(TARGETS astra astra-cli astra-runtime
     RUNTIME DESTINATION .
 )
 install(FILES README.md THIRD_PARTY_NOTICES.md DESTINATION .)
-install(FILES docs/ARCHITECTURE.md docs/GOOGLE_SERVICES.md DESTINATION docs)
+install(FILES docs/ARCHITECTURE.md docs/GOOGLE_SERVICES.md docs/VIRTUALIZATION.md DESTINATION docs)
+install(FILES tools/bootstrap-android-vm.ps1 tools/enable-windows-hypervisor.ps1 DESTINATION tools)
 
 if(ASTRA_BUILD_TESTS)
     enable_testing()
@@ -95,4 +97,9 @@ if(ASTRA_BUILD_TESTS)
     target_compile_options(astra-android-framework-tests PRIVATE /W4 /permissive- /utf-8)
     target_link_libraries(astra-android-framework-tests PRIVATE astra_core)
     add_test(NAME astra-android-framework COMMAND astra-android-framework-tests)
+
+    add_executable(astra-android-vm-tests tests/android_vm_tests.cpp)
+    target_compile_options(astra-android-vm-tests PRIVATE /W4 /permissive- /utf-8)
+    target_link_libraries(astra-android-vm-tests PRIVATE astra_core)
+    add_test(NAME astra-android-vm COMMAND astra-android-vm-tests)
 endif()
