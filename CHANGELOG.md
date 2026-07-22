@@ -4,6 +4,15 @@ All notable project changes are recorded here. The project follows Semantic
 Versioning once a stable public API exists; prerelease versions may change
 incompatibly.
 
+## [0.1.0-alpha.2] - 2026-07-22
+
+### Security
+
+- Updated the pinned zlib dependency from 1.3.1 to 1.3.2, which incorporates
+  the upstream 7ASecurity audit findings and additional hardening.
+- Scoped no-build CodeQL analysis to Astra-owned C and C++ source, header, and
+  test directories; full dependency compilation remains covered by Windows CI.
+
 ## [0.1.0-alpha.1] - 2026-07-22
 
 ### Added
@@ -33,4 +42,5 @@ incompatibly.
 - The virtualization backend requires separately accepted third-party terms and
   hardware virtualization.
 
+[0.1.0-alpha.2]: https://github.com/hasnainkhatri87/astra-runtime-windows/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/hasnainkhatri87/astra-runtime-windows/releases/tag/v0.1.0-alpha.1

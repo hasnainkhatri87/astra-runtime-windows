@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -33,15 +33,12 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: c-cpp
-          build-mode: manual
-
-      - name: Configure
-        shell: pwsh
-        run: cmake --preset win-x64-release
-
-      - name: Build
-        shell: pwsh
-        run: cmake --build --preset win-x64-release --parallel 4
+          build-mode: none
+          config: |
+            paths:
+              - include
+              - src
+              - tests
 
       - name: Analyze
         uses: github/codeql-action/analyze@v4

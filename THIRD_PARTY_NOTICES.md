@@ -1,10 +1,10 @@
 # Third-party notices
 
-## zlib 1.3.1
+## zlib 1.3.2
 
-Copyright (C) 1995-2024 Jean-loup Gailly and Mark Adler.
+Copyright (C) 1995-2026 Jean-loup Gailly and Mark Adler.
 
-Source: https://github.com/madler/zlib/tree/v1.3.1
+Source: https://github.com/madler/zlib/tree/v1.3.2
 License: zlib License
 
 zlib is compiled statically into Astra for bounded DEFLATE extraction. The
