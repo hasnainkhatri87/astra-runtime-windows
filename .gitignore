@@ -12,3 +12,6 @@ CMakeUserPresets.json
 local-packages/
 provisioned/
 app-cache/
+
+__pycache__/
+*.pyc

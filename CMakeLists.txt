@@ -57,9 +57,22 @@ target_link_libraries(astra-runtime PRIVATE astra_core comctl32 shell32)
 install(TARGETS astra astra-cli astra-runtime
     RUNTIME DESTINATION .
 )
-install(FILES README.md THIRD_PARTY_NOTICES.md DESTINATION .)
-install(FILES docs/ARCHITECTURE.md docs/GOOGLE_SERVICES.md docs/VIRTUALIZATION.md DESTINATION docs)
-install(FILES tools/bootstrap-android-vm.ps1 tools/enable-windows-hypervisor.ps1 DESTINATION tools)
+install(FILES README.md LICENSE NOTICE CHANGELOG.md THIRD_PARTY_NOTICES.md DESTINATION .)
+install(FILES
+    docs/ARCHITECTURE.md
+    docs/FOODPANDA_M2_RESULTS.md
+    docs/GOOGLE_SERVICES.md
+    docs/MUMU_HELPER.md
+    docs/ROADMAP.md
+    docs/VIRTUALIZATION.md
+    DESTINATION docs
+)
+install(FILES
+    tools/bootstrap-android-vm.ps1
+    tools/enable-windows-hypervisor.ps1
+    tools/open-playstore-package-mumu.ps1
+    DESTINATION tools
+)
 
 if(ASTRA_BUILD_TESTS)
     enable_testing()

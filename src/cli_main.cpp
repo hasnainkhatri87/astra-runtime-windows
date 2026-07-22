@@ -98,8 +98,7 @@ int wmain(int argument_count, wchar_t** arguments) {
                    << L"WHPX acceleration: "
                    << (status.acceleration_ready ? L"ready" : L"unavailable") << L'\n'
                    << L"Android device: " << (status.device_ready ? L"running" : L"stopped") << L'\n';
-        return status.sdk_ready && status.avd_ready &&
-                       status.firmware_virtualization_ready && status.acceleration_ready ? 0 : 4;
+        return status.sdk_ready && status.avd_ready && status.acceleration_ready ? 0 : 4;
     }
 
     if (command == L"vm-start") {

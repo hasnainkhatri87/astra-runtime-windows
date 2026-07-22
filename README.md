@@ -1,8 +1,29 @@
 # Astra Runtime
 
+[![Windows build](https://github.com/hasnainkhatri87/astra-runtime-windows/actions/workflows/windows-build.yml/badge.svg)](https://github.com/hasnainkhatri87/astra-runtime-windows/actions/workflows/windows-build.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/hasnainkhatri87/astra-runtime-windows?include_prereleases)](https://github.com/hasnainkhatri87/astra-runtime-windows/releases)
+
 Astra is an experimental, portable Windows compatibility runtime for
 user-provided Android application packages. Foodpanda is the first validation
 target; no application-specific behavior is built into Astra.
+
+> [!IMPORTANT]
+> Astra 0.1 is research software, not a completed Android runtime. The native
+> path cannot run arbitrary Android applications yet. Compatibility claims in
+> this repository are limited to reproducible evidence documented below.
+
+## Execution paths
+
+- **Native research path:** a small Windows C++ launcher, signed package intake,
+  DEX validation/execution proof, and framework foundations. This is the core
+  open-source research effort and remains incomplete.
+- **Optional Android VM backend:** a license-gated official Android 16 Google
+  Play image using Windows Hypervisor Platform. It is practical virtualization,
+  not native Android execution.
+- **Optional MuMuPlayer helper:** opens a package listing in an existing
+  third-party MuMuPlayer installation. Astra does not bundle MuMuPlayer or
+  automate account authentication. See [the helper guide](docs/MUMU_HELPER.md).
 
 ## Verified executable milestone
 
@@ -62,13 +83,18 @@ Command-line installation is also available:
 .\astra-cli.exe list
 .\astra-cli.exe services
 .\astra-cli.exe dex-execute "C:\Path\probe.dex" "Lexample/Probe;" "answer"
+.\astra-cli.exe vm-status
+.\astra-cli.exe vm-start
+.\astra-cli.exe vm-run "<installed-app-id>"
 ```
 
 ## No large local builder
 
 The GitHub Actions workflow compiles and tests Astra on a temporary Windows
 runner and publishes `AstraRuntime-win-x64.zip`. A user needs only the portable
-ZIP; Android Studio and the Android SDK are not required.
+ZIP for native package intake; Android Studio is not required. The optional
+Android VM backend downloads its SDK, system image, and Java runtime separately
+only after the user accepts the relevant third-party terms.
 
 The workflow never uploads an APK. Android package formats are ignored by Git,
 rejected if accidentally tracked, and checked again before artifact publishing.
@@ -120,3 +146,16 @@ security policy.
 
 Astra is not affiliated with or endorsed by Google, Foodpanda, or Delivery Hero.
 "Android" is used only as a descriptive trademark of Google LLC.
+
+## Project and community
+
+- [Roadmap](docs/ROADMAP.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Maintainers](MAINTAINERS.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Changelog](CHANGELOG.md)
+
+Astra Runtime is licensed under [Apache-2.0](LICENSE). Third-party attributions
+are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

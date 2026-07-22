@@ -329,18 +329,6 @@ std::vector<std::filesystem::path> SelectedApks(const InstalledApp& app) {
     return apks;
 }
 
-std::wstring ComponentName(const InstalledApp& app) {
-    if (app.package_name.empty() || app.launcher_activity.empty()) {
-        throw std::runtime_error("package metadata has no launcher Activity");
-    }
-    std::wstring activity = app.launcher_activity;
-    if (activity.front() == L'.') {
-        activity = app.package_name + activity;
-    } else if (activity.find(L'.') == std::wstring::npos) {
-        activity = app.package_name + L"." + activity;
-    }
-    return app.package_name + L"/" + activity;
-}
 
 }  // namespace
 
@@ -382,13 +370,17 @@ AndroidVmStatus InspectAndroidVm() {
     const auto acceleration = RunCapture(emulator, {L"-accel-check"},
                                          kShortCommandTimeoutMs);
     status.acceleration_ready = IsCommandSuccessful(acceleration);
+    // An active Windows hypervisor can mask the firmware probe. A successful
+    // emulator acceleration check is authoritative evidence that virtualization
+    // is available to this process.
+    if (status.acceleration_ready) {
+        status.firmware_virtualization_ready = true;
+    }
     const auto device = RunCapture(adb, {L"-e", L"get-state"}, 5000);
     status.device_ready = IsCommandSuccessful(device) && ContainsDevice(device.output);
     if (!status.avd_ready) {
         status.message = L"Android SDK is installed, but the Astra Play AVD is missing. "
                          L"Run bootstrap-android-vm.ps1 again.";
-    } else if (!status.firmware_virtualization_ready) {
-        status.message = L"CPU firmware virtualization is disabled. Enable Intel VT-x/AMD-V in BIOS/UEFI.";
     } else if (!status.acceleration_ready) {
         status.message = L"Windows Hypervisor Platform is unavailable: " +
                          CompactOutput(acceleration.output);
@@ -402,8 +394,7 @@ AndroidVmStatus InspectAndroidVm() {
 
 AndroidVmResult StartAndroidVm() {
     const auto status = InspectAndroidVm();
-    if (!status.sdk_ready || !status.avd_ready || !status.firmware_virtualization_ready ||
-        !status.acceleration_ready) {
+    if (!status.sdk_ready || !status.avd_ready || !status.acceleration_ready) {
         return {false, status.message};
     }
     if (status.device_ready) {
@@ -443,16 +434,20 @@ AndroidVmResult InstallAndRunInAndroidVm(const InstalledApp& app) {
             return {false, L"ADB split installation failed: " +
                                CompactOutput(installed.output)};
         }
+        // Use Android's normal launcher-intent path. A manifest can contain
+        // internal, non-exported launcher-like activities that shell cannot
+        // start directly; the package launcher resolves the exported entry.
         const auto launched = RunCapture(
-            AdbPath(), {L"-e", L"shell", L"am", L"start", L"-W", L"-n",
-                        ComponentName(app)}, kShortCommandTimeoutMs);
+            AdbPath(), {L"-e", L"shell", L"monkey", L"-p", app.package_name,
+                        L"-c", L"android.intent.category.LAUNCHER", L"1"},
+            kShortCommandTimeoutMs);
         if (!IsCommandSuccessful(launched)) {
             return {false, L"Android Activity launch failed: " +
                                CompactOutput(launched.output)};
         }
         return {true, L"Installed " + std::to_wstring(apks.size()) +
-                          L" verified APK split(s) and started " +
-                          app.launcher_activity + L". " + CompactOutput(launched.output)};
+                          L" verified APK split(s) and sent the package's normal "
+                          L"launcher intent. " + CompactOutput(launched.output)};
     } catch (const std::exception&) {
         return {false, L"Astra could not prepare the selected APK splits for ADB installation."};
     }

@@ -61,9 +61,14 @@ No Google Play Store, GMS, Android image, Java runtime, or user credentials are 
 
 Require-Condition ([Environment]::Is64BitOperatingSystem) 'A 64-bit Windows installation is required.'
 $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
-Require-Condition $cpu.VirtualizationFirmwareEnabled 'Firmware virtualization is disabled. Enable Intel VT-x or AMD-V in BIOS/UEFI first.'
+$computer = Get-CimInstance Win32_ComputerSystem
+Require-Condition ($cpu.VirtualizationFirmwareEnabled -or $computer.HypervisorPresent) `
+    'Firmware virtualization is disabled. Enable Intel VT-x or AMD-V in BIOS/UEFI first.'
 
 $runtimeRoot = [IO.Path]::GetFullPath($RuntimeRoot)
+# Persist only Astra's VM location; no global SDK paths are changed.
+[Environment]::SetEnvironmentVariable('ASTRA_VM_ROOT', $runtimeRoot, 'User')
+$env:ASTRA_VM_ROOT = $runtimeRoot
 $sdkRoot = Get-ContainedPath -BasePath $runtimeRoot -ChildPath (Join-Path $runtimeRoot 'sdk')
 $avdRoot = Get-ContainedPath -BasePath $runtimeRoot -ChildPath (Join-Path $runtimeRoot 'avd')
 $androidUserHome = Get-ContainedPath -BasePath $runtimeRoot -ChildPath (Join-Path $runtimeRoot 'android-user')
@@ -88,8 +93,10 @@ if ($JavaHome) {
 
 if (-not $javaExe -and $InstallPortableJre) {
     $jreArchive = Join-Path $cacheRoot 'temurin-jre.zip'
-    $jreUrl = 'https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jre/hotspot/normal/eclipse'
-    $expected = (Invoke-WebRequest -Uri "$jreUrl.sha256.txt" -UseBasicParsing).Content.Trim().Split()[0]
+    $release = Invoke-RestMethod -Uri 'https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse'
+    $package = $release | Select-Object -First 1 -ExpandProperty binary | Select-Object -ExpandProperty package
+    $jreUrl = $package.link
+    $expected = $package.checksum
     Require-Condition ($expected -match '^[0-9a-fA-F]{64}$') 'Temurin checksum response is invalid.'
     Invoke-VerifiedDownload -Uri $jreUrl -Destination $jreArchive -ExpectedHash $expected -Algorithm SHA256
     $jreRoot = Get-ContainedPath -BasePath $runtimeRoot -ChildPath (Join-Path $runtimeRoot 'jre')
